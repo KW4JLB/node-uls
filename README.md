@@ -4,7 +4,7 @@
 Web based app- Create a MySQL 9.4.0 container named "uls-db"
 - Create the ULS database with all 67 tables from the FCC ULS schema
 - Set up the required user accounts
-- Mount the database storage at `.docker/mysql-data` for persistencetion written in node.js for querying the FCC Universal Licensing System. 
+- Mount the database storage at `.docker/mysql-data` for persistencetion written in node.js for querying the FCC Universal Licensing System.
 
 ## Features
 - One off queries
@@ -18,7 +18,7 @@ Web based app- Create a MySQL 9.4.0 container named "uls-db"
 - docker-compose.yml for local execution
 
 ## Backend
-- MySQL Docker container with persistent storage and an init script to build the Database tables. 
+- MySQL Docker container with persistent storage and an init script to build the Database tables.
 - Database Schema can be found in `.ai/uls_sqlite_schema.md`
 
 ## Frontend
@@ -60,4 +60,3 @@ To connect to the database:
 - Password: uls_secure_password
 
 The database schema is initialized using the `init.sql` script, which creates all 67 tables defined in the FCC Universal Licensing System schema. This provides a complete local development environment that matches the production schema.
-

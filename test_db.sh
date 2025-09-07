@@ -37,11 +37,11 @@ docker exec uls-db mysql -u uls_app_user -puls_secure_password -e "USE uls; SHOW
 # Check if all expected tables exist
 if [ "$table_count" -eq 94 ]; then
   echo "✅ Success: All 94 tables are properly created!"
-  
+
   # Display a sample row count for a few key tables
   echo "Verifying table structure with sample counts:"
   docker exec uls-db mysql -u uls_app_user -puls_secure_password -e "USE uls; SELECT 'HD Table' as 'Table', COUNT(*) as 'Row Count' FROM HD UNION SELECT 'EN Table', COUNT(*) FROM EN UNION SELECT 'AM Table', COUNT(*) FROM AM;"
-  
+
   # Check database connection from host
   echo "Testing database connection from host machine..."
   if command -v mysql &> /dev/null; then
@@ -54,7 +54,7 @@ if [ "$table_count" -eq 94 ]; then
   else
     echo "⚠️ MySQL client not installed on host machine. Skipping connection test."
   fi
-  
+
   exit 0
 else
   echo "⚠️ Warning: Expected 94 tables but found $table_count tables."
