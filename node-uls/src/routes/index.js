@@ -12,14 +12,8 @@ const healthRoutes = require('./health');
 // Home page route
 router.get('/', homeController.getHomePage);
 
-// About page route (simple for now)
-router.get('/about', (req, res) => {
-  res.send(`
-    <h1>About ULS Explorer</h1>
-    <p>This application allows users to query the FCC Universal Licensing System database.</p>
-    <p><a href="/">Back to Home</a></p>
-  `);
-});
+// About page route
+router.get('/about', homeController.getAboutPage);
 
 // Register health routes
 router.use('/api', healthRoutes);

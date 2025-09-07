@@ -10,6 +10,7 @@ const cors = require('cors');
 const fs = require('fs');
 const config = require('./config');
 const { requestLogger, logger } = require('./middleware/logger');
+const { setupViewEngine } = require('./middleware/viewEngine');
 
 // Create logs directory if it doesn't exist
 if (!fs.existsSync('./logs')) {
@@ -19,8 +20,20 @@ if (!fs.existsSync('./logs')) {
 // Create Express application
 const app = express();
 
+// View engine setup
+setupViewEngine(app);
+
 // Middleware setup
-app.use(helmet()); // Security headers
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", "data:"]
+    }
+  }
+})); // Security headers with CSP configured for our needs
 app.use(cors()); // CORS support
 app.use(express.json()); // Parse JSON bodies
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
@@ -28,7 +41,11 @@ app.use(morgan(config.server.nodeEnv === 'development' ? 'dev' : 'combined')); /
 app.use(requestLogger); // Custom request logger
 
 // Serve static files
-app.use(express.static(path.join(__dirname, 'public')));
+const staticPath = process.env.NODE_ENV === 'production'
+  ? path.join(__dirname, '../dist/public')
+  : path.join(__dirname, 'public');
+
+app.use(express.static(staticPath));
 
 // Import routes
 const indexRoutes = require('./routes');
@@ -38,32 +55,10 @@ app.use('/', indexRoutes);
 
 // 404 handler
 app.use((req, res) => {
-  res.status(404).send(`
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>404 - Not Found | ${config.app.name}</title>
-      <link rel="stylesheet" href="/css/style.css">
-    </head>
-    <body>
-      <div class="container">
-        <header>
-          <h1>${config.app.name}</h1>
-        </header>
-        <main>
-          <h2>404 - Page Not Found</h2>
-          <p>The page you are looking for does not exist.</p>
-          <p><a href="/">Go back to home page</a></p>
-        </main>
-        <footer>
-          <p>&copy; ${new Date().getFullYear()} - ${config.app.name}</p>
-        </footer>
-      </div>
-    </body>
-    </html>
-  `);
+  res.status(404).render('pages/404', {
+    title: '404 - Not Found',
+    currentPage: 'error'
+  });
 });
 
 // Error handler
@@ -73,33 +68,15 @@ app.use((err, req, res, next) => {
 
   const statusCode = err.statusCode || 500;
 
-  res.status(statusCode).send(`
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Error | ${config.app.name}</title>
-      <link rel="stylesheet" href="/css/style.css">
-    </head>
-    <body>
-      <div class="container">
-        <header>
-          <h1>${config.app.name}</h1>
-        </header>
-        <main>
-          <h2>An Error Occurred</h2>
-          <p>${err.message || 'Internal Server Error'}</p>
-          ${config.server.nodeEnv === 'development' ? `<pre>${err.stack}</pre>` : ''}
-          <p><a href="/">Go back to home page</a></p>
-        </main>
-        <footer>
-          <p>&copy; ${new Date().getFullYear()} - ${config.app.name}</p>
-        </footer>
-      </div>
-    </body>
-    </html>
-  `);
+  res.status(statusCode).render('pages/error', {
+    title: 'Error',
+    statusCode,
+    message: err.message || 'Internal Server Error',
+    details: 'An unexpected error occurred while processing your request.',
+    stack: err.stack,
+    showStack: config.server.nodeEnv === 'development',
+    currentPage: 'error'
+  });
 });
 
 // Start server

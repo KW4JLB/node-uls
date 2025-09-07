@@ -1,0 +1,8 @@
+<div class="error-content">
+  <h2><%= statusCode %> - <%= message %></h2>
+  <p><%= details %></p>
+  <% if (stack && showStack) { %>
+    <pre class="error-stack"><%= stack %></pre>
+  <% } %>
+  <p><a href="/" class="btn btn-primary">Go back to home page</a></p>
+</div>
