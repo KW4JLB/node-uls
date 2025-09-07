@@ -1,0 +1,6 @@
+# Ignore Docker local files used for testing
+.docker
+
+# Ignore AI files
+.ai
+
