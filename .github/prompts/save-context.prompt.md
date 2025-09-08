@@ -1,4 +1,5 @@
 ---
+mode: 'agent'
 description: 'Documentation and context creation and management standards'
 applyTo: '*'
 ---
